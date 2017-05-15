@@ -1,0 +1,49 @@
+waitUntil { !isNil ("dayz_Totalzedscheck") and
+!(player getVariable ["humanity",0] > 5000 and
+typeOf player == "Survivor2_DZ") and
+!(player getVariable ["humanity",0] < -2000 and
+(typeOf player == "Survivor2_DZ" or
+typeOf player == "SurvivorW2_DZ") ) and
+!(player getVariable ["humanity",0] > 0 and
+(typeOf player == "Bandit1_DZ" or
+typeOf player == "BanditW1_DZ") )
+};
+
+wardrobeChange = {
+	{player removeAction _x;} foreach s_wardrobe_array;
+	[dayz_playerUID,dayz_characterID,_this] call player_humanityMorph;
+	titleText ["Looking good! You can change clothes again in 1 minute...", "PLAIN DOWN"];
+	sleep 60;
+	s_wardrobe_array set [count s_wardrobe_array, player addAction [("<t color=""#ff8810"">" + ("Wardrobe") +"</t>"), "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (call wardrobemain);"]];
+};
+
+wardrobemain = {
+	{player removeAction _x;} foreach s_wardrobe_array;
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["WardrobeCustom", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (call wardrobeCustom);"]];
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["WardrobeDayZ", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (call wardrobedayz);"]];
+};
+
+wardrobeCustom = {
+	{player removeAction _x;} foreach s_wardrobe_array;
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["Rocket Uniform", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (""Rocket_DZ"" call wardrobeChange);"]];
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["Desert Rocket Uniform", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (""BAF_Soldier_Officer_DDPM"" call wardrobeChange);"]];
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["Desert Camo Clothing", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (""BAF_Soldier_L_DDPM"" call wardrobeChange);"]];
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["Desert Soldier Uniform", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (""BAF_Soldier_DDPM"" call wardrobeChange);"]];
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["Desert Green Uniform", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (""BAF_Soldier_MTP"" call wardrobeChange);"]];
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["US Soldier Uniform", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (""US_Soldier_EP1"" call wardrobeChange);"]];
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["Czech Soldier Uniform", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (""CZ_Soldier_DES_EP1"" call wardrobeChange);"]];
+};
+
+wardrobedayz = {
+	{player removeAction _x;} foreach s_wardrobe_array;
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["Male Suvivor", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (""Survivor2_DZ"" call wardrobeChange);"]];
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["Female Suvivor", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (""SurvivorW2_DZ"" call wardrobeChange);"]];
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["Male Bandit", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (""Bandit1_DZ"" call wardrobeChange);"]];
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["Female Bandit", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (""BanditW1_DZ"" call wardrobeChange);"]];
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["Camo Clothing", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (""Camo1_DZ"" call wardrobeChange);"]];
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["Ghillie Suit", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (""Sniper1_DZ"" call wardrobeChange);"]];
+	s_wardrobe_array set [count s_wardrobe_array, player addAction ["Soldier Uniform", "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (""Soldier1_DZ"" call wardrobeChange);"]];
+};
+
+s_wardrobe_array = [];
+s_wardrobe_array set [count s_wardrobe_array, player addAction [("<t color=""#ff8810"">" + ("Wardrobe") +"</t>"), "ca\modules\MP\data\scriptCommands\moveIn.sqf", "Driver (call wardrobemain);"]];
