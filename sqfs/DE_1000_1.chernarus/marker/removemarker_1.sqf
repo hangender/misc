@@ -1,0 +1,1 @@
+deleteMarker "myMarker1";

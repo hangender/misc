@@ -1,0 +1,715 @@
+class FSM
+{
+fsmName = "Breaking Point Server Cleanup";
+class States
+{
+
+class init
+{
+name = "init";
+init = "";
+precondition = "";
+class Links
+{
+
+class initialized
+{
+priority = 0.000000;
+to="Prepare";
+precondition = "";
+condition="!isnil ""bis_fnc_init""";
+action="";
+};
+
+};
+};
+
+
+class Waiting
+{
+name = "Waiting";
+init = "";
+precondition = "";
+class Links
+{
+
+class Common_Tasks
+{
+priority = 5.000000;
+to="Cleanup";
+precondition = "";
+condition="(diag_tickTime - _lastZombieCheck) > 180";
+action="_lastZombieCheck = diag_tickTime;";
+};
+
+
+class Update_Required
+{
+priority = 1.000000;
+to="Update_Objects";
+precondition = "";
+condition="( (count needUpdate_objects) > 0 && (diag_tickTime -_lastNeedUpdate>40) )";
+action="_lastNeedUpdate = diag_tickTime;";
+};
+
+
+class Time_Sync_Requir
+{
+priority = 1.000000;
+to="Preform_Time_Syn";
+precondition = "";
+condition="((diag_tickTime - _lastUpdate) > 300)";
+action="_lastUpdate = diag_tickTime;";
+};
+
+
+class Low_FPS
+{
+priority = 1.000000;
+to="Massive_Cleanup";
+precondition = "";
+condition="( diag_fps < 2 && (diag_tickTime-_lastFPSCleanup > 1800) )";
+action="_lastFPSCleanup = diag_tickTime;";
+};
+
+
+class Ban_Update
+{
+priority = 1.000000;
+to="Update_Bans";
+precondition = "";
+condition="((diag_tickTime - _lastBanUpdate) > 300)";
+action="_lastBanUpdate = diag_tickTime;";
+};
+
+
+class Dead_Cleanup
+{
+priority = 0.000000;
+to="Cleanup_Dead";
+precondition = "";
+condition="(diag_tickTime - _lastDeadCheck) > 60";
+action="_lastDeadCheck = diag_tickTime;";
+};
+
+
+class true
+{
+priority = 0.000000;
+to="General_Cleanup";
+precondition = "";
+condition="true";
+action="";
+};
+
+
+class __0_Min_Cleanup
+{
+priority = 0.000000;
+to="Cleanup_Objects";
+precondition = "";
+condition="((diag_tickTime - _lastItemCheck) > 1800)";
+action="_lastItemCheck = diag_tickTime;";
+};
+
+};
+};
+
+
+class Cleanup_Objects
+{
+name = "Cleanup_Objects";
+init = "private [""_delQty"",""_keep"",""_nearby"",""_myGroupX"",""_delQtyAnimalR"",""_delQtyAnimal"",""_xtypeanimal"",""_missionObjs"",""_qty"",""_animaltype""];" \n
+"" \n
+"//Reset the Login Queue!" \n
+"BP_LoginQueue = [];" \n
+"" \n
+"//Server Cleanup" \n
+"_missionObjs = allMissionObjects ""WeaponHolder"";" \n
+"_qty = count _missionObjs;" \n
+"_delQty = 0;" \n
+"{" \n
+"	if (local _x) then {" \n
+"		_keep = _x getVariable [""permaLoot"",false];" \n
+"                _nearby = {isPlayer _x} count (_x nearEntities [[""CAManBase""], 100]);" \n
+"		if ( (!_keep) && (_nearby==0) ) then {" \n
+"			deleteVehicle _x;" \n
+"			_delQty = _delQty + 1;" \n
+"		};" \n
+"	};" \n
+"} forEach _missionObjs;" \n
+"" \n
+"_delQtyAnimal = 0;" \n
+"_animaltype = [];" \n
+"_delQtyAnimalR = 0;" \n
+"{" \n
+"	_xtypeanimal = typeof _x;" \n
+"	if(_xtypeanimal==""Rabbit"") then {" \n
+"			  _myGroupX = group _x;" \n
+"                    _x removeAllMPEventHandlers ""mpkilled"";" \n
+"                    _x removeAllMPEventHandlers ""mphit"";" \n
+"                    _x removeAllMPEventHandlers ""mprespawn"";" \n
+"      " \n
+"                    _x removeAllEventHandlers ""FiredNear"";" \n
+"                    _x removeAllEventHandlers ""HandleDamage"";" \n
+"                    _x removeAllEventHandlers ""Killed"";" \n
+"                    _x removeAllEventHandlers ""Fired"";" \n
+"                    _x removeAllEventHandlers ""GetOut"";" \n
+"                    _x removeAllEventHandlers ""Local"";" \n
+"     " \n
+"                    clearVehicleInit _x; //let's clear all PICs" \n
+"                    deleteVehicle _x;" \n
+"                    deleteGroup _myGroupX;" \n
+"                    _x = nil; //this seems clean even more :) thx Tansien" \n
+"			_delQtyAnimalR = _delQtyAnimalR+1;" \n
+"	} else {" \n
+"	_nearby = {isPlayer _x} count (_x nearEntities [[""BanditW1_DZ"",""SurvivorW2_DZ"",""Bandit1_DZ"",""Survivor2_DZ"",""Survivor2_1DZ"",""Survivor2_2DZ"",""Survivor2_3DZ"",""Survivor3_DZ"",""Survivor4_DZ"",""Survivor4_1DZ"",""Survivor4_2DZ"",""Survivor4_3DZ"",""Survivor8_DZ"",""Survivor8_1DZ"",""Survivor8_2DZ"",""Survivor8_3DZ"",""Bandit_S_DZ"",""Bandit1_1DZ"",""Bandit1_2DZ"",""Bandit1_3DZ"",""Bandit1_3_1DZ"",""Bandit1_3_2DZ"",""Bandit2_1DZ"",""Bandit2_2DZ"",""Bandit2_3DZ"",""Bandit2_4DZ"",""Bandit2_5DZ"",""Bandit3_1"",""Hero1_1DZ"",""Hero1_2DZ"",""Hero1_3DZ"",""Hero1_4DZ"",""Hero1_5DZ"",""Hero1_6DZ"",""Hero1_7DZ"",""Hero2_1DZ"",""Hero2_2DZ"",""Hero2_3DZ"",""Hero2_4DZ"",""Hero2_5DZ"",""Hero3_1DZ"",""Hero3_2DZ"",""Hero3_3DZ"",""Hero3_4DZ"",""Hero3_5DZ"",""Hero3_6DZ"",""Hero2_10DZ"",""Sniper1_DZ""], 100]);" \n
+"	" \n
+"	if (!(_xtypeanimal in _animaltype)) then { _animaltype set [(count _animaltype),(typeOf _x)]; };" \n
+"	if (_nearby==0) then {" \n
+"			  _myGroupX = group _x;" \n
+"                    _x removeAllMPEventHandlers ""mpkilled"";" \n
+"                    _x removeAllMPEventHandlers ""mphit"";" \n
+"                    _x removeAllMPEventHandlers ""mprespawn"";" \n
+"                    _x removeAllEventHandlers ""FiredNear"";" \n
+"                    _x removeAllEventHandlers ""HandleDamage"";" \n
+"                    _x removeAllEventHandlers ""Killed"";" \n
+"                    _x removeAllEventHandlers ""Fired"";" \n
+"                    _x removeAllEventHandlers ""GetOut"";" \n
+"                    _x removeAllEventHandlers ""Local"";" \n
+"                    clearVehicleInit _x;" \n
+"                    deleteVehicle _x;" \n
+"                    deleteGroup _myGroupX;" \n
+"                    _x = nil;" \n
+"			_delQtyAnimal = _delQtyAnimal + 1;" \n
+"	};" \n
+"	};" \n
+"} forEach allMissionObjects ""Animal"";";
+precondition = "";
+class Links
+{
+
+class true
+{
+priority = 0.000000;
+to="General_Cleanup";
+precondition = "";
+condition="true";
+action="";
+};
+
+};
+};
+
+
+class Preform_Time_Syn
+{
+name = "Preform_Time_Syn";
+init = "private [""_date"",""_dateNum"",""_diff"",""_key"",""_result"",""_outcome""];" \n
+"//Send request" \n
+"_key = ""CHILD:307:"";" \n
+"_result = _key call server_hiveReadWrite;" \n
+"_outcome = _result select 0;" \n
+"if(_outcome == ""PASS"") then {" \n
+"	_date = _result select 1; " \n
+"	_dateNum = dateToNumber(_date); " \n
+"	_diff = ( _dateNum - dateToNumber (date) )*365*24*60;" \n
+"	if ( abs(_diff)>5 ) then {" \n
+"		setDate _date;" \n
+"		dayzSetDate = _date;" \n
+"		publicVariable ""dayzSetDate"";" \n
+"		diag_log (""TIME SYNC: Local Time set to "" + str(_date));" \n
+"	};" \n
+"};" \n
+"";
+precondition = "";
+class Links
+{
+
+class true
+{
+priority = 0.000000;
+to="General_Cleanup";
+precondition = "";
+condition="true";
+action="";
+};
+
+};
+};
+
+
+class General_Cleanup
+{
+name = "General_Cleanup";
+init = "//Clean groups" \n
+"{" \n
+"	if (count units _x==0) then {" \n
+"		deleteGroup _x;" \n
+"		_x = nil;" \n
+"	};" \n
+"} forEach allGroups;" \n
+"" \n
+"call BPServer_LoginQueueProcess;" \n
+"" \n
+"dayz_serverObjectMonitor = _safety;";
+precondition = "";
+class Links
+{
+
+class true
+{
+priority = 0.000000;
+to="Waiting";
+precondition = "";
+condition="true";
+action="";
+};
+
+};
+};
+
+
+class Prepare
+{
+name = "Prepare";
+init = "diag_log (""CLEANUP: INITIALIZING CLEANUP SCRIPT"");" \n
+"" \n
+"" \n
+"_safety = dayz_serverObjectMonitor;" \n
+"_dateNow = (DateToNumber date);" \n
+"" \n
+"_lastUpdate = diag_tickTime;" \n
+"_timeNem = diag_tickTime;" \n
+"_lastZombieCheck = diag_tickTime;" \n
+"_deadBodies = [];" \n
+"_lastNeedUpdate = diag_tickTime;" \n
+"_maxBodies = 15;" \n
+"_lastDeadSurvivorCheck = diag_tickTime;" \n
+"" \n
+"_lastDeadCheck = diag_tickTime;" \n
+"_lastFPSCleanup = diag_tickTime;" \n
+"" \n
+"_lastBanUpdate = diag_tickTime;";
+precondition = "";
+class Links
+{
+
+class true
+{
+priority = 0.000000;
+to="Waiting";
+precondition = "";
+condition="true";
+action="";
+};
+
+};
+};
+
+
+class Update_Objects
+{
+name = "Update_Objects";
+init = "diag_log format[""DEBUG: needUpdate_objects=%1"",needUpdate_objects];" \n
+"{" \n
+"//	_x setVariable [""needUpdate"",false,true];" \n
+"	needUpdate_objects = needUpdate_objects - [_x];" \n
+"	[_x,""all""] call server_updateObject;" \n
+"" \n
+"} forEach needUpdate_objects;" \n
+"";
+precondition = "";
+class Links
+{
+
+class true
+{
+priority = 0.000000;
+to="General_Cleanup";
+precondition = "";
+condition="true";
+action="";
+};
+
+};
+};
+
+
+class Cleanup
+{
+name = "Cleanup";
+init = "private [""_myGroupX""];" \n
+"" \n
+"//Disable Zombie Server Side Simulation" \n
+"{" \n
+"	if (isPlayer _x) then {" \n
+"		_myGroupX = group _x;" \n
+"		 _x removeAllMPEventHandlers ""mpkilled"";" \n
+"		_x removeAllMPEventHandlers ""mphit"";" \n
+"		_x removeAllMPEventHandlers ""mprespawn"";" \n
+"		_x removeAllEventHandlers ""FiredNear"";" \n
+"		_x removeAllEventHandlers ""HandleDamage"";" \n
+"		_x removeAllEventHandlers ""Killed"";" \n
+"		_x removeAllEventHandlers ""Fired"";" \n
+"		_x removeAllEventHandlers ""GetOut"";" \n
+"		_x removeAllEventHandlers ""Local"";" \n
+"		clearVehicleInit _x;" \n
+"		deleteVehicle _x;" \n
+"		deleteGroup _myGroupX;" \n
+"		 _x = nil;" \n
+"	} else {" \n
+"		_x enableSimulation false;" \n
+"	};" \n
+"" \n
+"} forEach entities ""zZombie_Base"";" \n
+"" \n
+"//Disable Bloodsucker Server Side Simulation" \n
+"{" \n
+"	_x enableSimulation false;" \n
+"	if ((local _x) or (isPlayer _x)) then {" \n
+"		_myGroupX = group _x;" \n
+"		 _x removeAllMPEventHandlers ""mpkilled"";" \n
+"		_x removeAllMPEventHandlers ""mphit"";" \n
+"		 _x removeAllMPEventHandlers ""mprespawn"";" \n
+"		 _x removeAllEventHandlers ""FiredNear"";" \n
+"		 _x removeAllEventHandlers ""HandleDamage"";" \n
+"		_x removeAllEventHandlers ""Killed"";" \n
+"		_x removeAllEventHandlers ""Fired"";" \n
+"		 _x removeAllEventHandlers ""GetOut"";" \n
+"		 _x removeAllEventHandlers ""Local"";" \n
+"		clearVehicleInit _x;" \n
+"		deleteVehicle _x;" \n
+"		deleteGroup _myGroupX;" \n
+"		 _x = nil;" \n
+"	};" \n
+"} forEach entities ""Bloodsucker_Base"";" \n
+"" \n
+"//Disable Infected Hound Server Side Simulation + Cleanup" \n
+"{" \n
+"	_x enableSimulation false;" \n
+"	if ((local _x) or (isPlayer _x)) then {" \n
+"		_myGroupX = group _x;" \n
+"		 _x removeAllMPEventHandlers ""mpkilled"";" \n
+"		_x removeAllMPEventHandlers ""mphit"";" \n
+"		 _x removeAllMPEventHandlers ""mprespawn"";" \n
+"		 _x removeAllEventHandlers ""FiredNear"";" \n
+"		 _x removeAllEventHandlers ""HandleDamage"";" \n
+"		_x removeAllEventHandlers ""Killed"";" \n
+"		_x removeAllEventHandlers ""Fired"";" \n
+"		 _x removeAllEventHandlers ""GetOut"";" \n
+"		 _x removeAllEventHandlers ""Local"";" \n
+"		clearVehicleInit _x;" \n
+"		deleteVehicle _x;" \n
+"		deleteGroup _myGroupX;" \n
+"		 _x = nil;" \n
+"	};" \n
+"} forEach entities ""DZ_Pastor_Infected"";" \n
+"" \n
+"//Disable Animal Server Side Simulation" \n
+"{" \n
+"	if (!(isPlayer _x)) then {" \n
+"		_x enableSimulation false;" \n
+"	};" \n
+"} forEach allMissionObjects ""Animal"";" \n
+"" \n
+"//Delete Hacker Boxes" \n
+" {" \n
+"	 if (((count ((getWeaponCargo _x) select 1))+(count ((getMagazineCargo _x) select 1))) > 80) then {" \n
+"		 deleteVehicle _x;" \n
+"		_x = nil;" \n
+"	 };" \n
+" } forEach allMissionObjects ""All"";" \n
+"" \n
+"//Fix Players who are birds." \n
+"{" \n
+"	if (isPlayer _x) then {" \n
+"		_myGroupX = group _x;" \n
+"		 _x removeAllMPEventHandlers ""mpkilled"";" \n
+"		_x removeAllMPEventHandlers ""mphit"";" \n
+"		 _x removeAllMPEventHandlers ""mprespawn"";" \n
+"		 _x removeAllEventHandlers ""FiredNear"";" \n
+"		 _x removeAllEventHandlers ""HandleDamage"";" \n
+"		_x removeAllEventHandlers ""Killed"";" \n
+"		_x removeAllEventHandlers ""Fired"";" \n
+"		 _x removeAllEventHandlers ""GetOut"";" \n
+"		 _x removeAllEventHandlers ""Local"";" \n
+"		clearVehicleInit _x;" \n
+"		deleteVehicle _x;" \n
+"		deleteGroup _myGroupX;" \n
+"		 _x = nil;" \n
+"	};" \n
+"} forEach entities ""Seagull"";" \n
+"" \n
+"//Fix Players who are birds." \n
+"{" \n
+"	if (isPlayer _x) then {" \n
+"		_myGroupX = group _x;" \n
+"		 _x removeAllMPEventHandlers ""mpkilled"";" \n
+"		_x removeAllMPEventHandlers ""mphit"";" \n
+"		 _x removeAllMPEventHandlers ""mprespawn"";" \n
+"		 _x removeAllEventHandlers ""FiredNear"";" \n
+"		 _x removeAllEventHandlers ""HandleDamage"";" \n
+"		_x removeAllEventHandlers ""Killed"";" \n
+"		_x removeAllEventHandlers ""Fired"";" \n
+"		 _x removeAllEventHandlers ""GetOut"";" \n
+"		 _x removeAllEventHandlers ""Local"";" \n
+"		clearVehicleInit _x;" \n
+"		deleteVehicle _x;" \n
+"		deleteGroup _myGroupX;" \n
+"		 _x = nil;" \n
+"	};" \n
+"} forEach entities ""Bird"";" \n
+"" \n
+"//Fix Players who are birds." \n
+"{" \n
+"	if (isPlayer _x) then {" \n
+"		_myGroupX = group _x;" \n
+"		 _x removeAllMPEventHandlers ""mpkilled"";" \n
+"		_x removeAllMPEventHandlers ""mphit"";" \n
+"		 _x removeAllMPEventHandlers ""mprespawn"";" \n
+"		 _x removeAllEventHandlers ""FiredNear"";" \n
+"		 _x removeAllEventHandlers ""HandleDamage"";" \n
+"		_x removeAllEventHandlers ""Killed"";" \n
+"		_x removeAllEventHandlers ""Fired"";" \n
+"		 _x removeAllEventHandlers ""GetOut"";" \n
+"		 _x removeAllEventHandlers ""Local"";" \n
+"		clearVehicleInit _x;" \n
+"		deleteVehicle _x;" \n
+"		deleteGroup _myGroupX;" \n
+"		 _x = nil;" \n
+"	};" \n
+"} forEach entities ""Birds"";";
+precondition = "";
+class Links
+{
+
+class true
+{
+priority = 0.000000;
+to="General_Cleanup";
+precondition = "";
+condition="true";
+action="";
+};
+
+};
+};
+
+
+class Cleanup_Dead
+{
+name = "Cleanup_Dead";
+init = "private [""_delQtyZ"",""_numZombie"",""_modeldex"",""_myGroupX""];" \n
+"" \n
+"_delQtyZ = 0;" \n
+"_numZombie = {_x isKindOf ""zZombie_Base""} count allDead;" \n
+"{" \n
+"	_modeldex = typeOf _x;" \n
+"		if (_x isKindOf ""zZombie_Base"") then {" \n
+"                     _myGroupX = group _x;" \n
+"                     _x removeAllMPEventHandlers ""mpkilled"";" \n
+"                     _x removeAllMPEventHandlers ""mphit"";" \n
+"                     _x removeAllMPEventHandlers ""mprespawn"";" \n
+"                     _x removeAllEventHandlers ""FiredNear"";" \n
+"                    _x removeAllEventHandlers ""HandleDamage"";" \n
+"                    _x removeAllEventHandlers ""Killed"";" \n
+"                    _x removeAllEventHandlers ""Fired"";" \n
+"                    _x removeAllEventHandlers ""GetOut"";" \n
+"                    _x removeAllEventHandlers ""Local"";" \n
+"                     clearVehicleInit _x; //let's clear all PICs" \n
+"                    deleteVehicle _x;" \n
+"                    deleteGroup _myGroupX;" \n
+"                    _x = nil;" \n
+"			_delQtyZ = _delQtyZ + 1;" \n
+"		};" \n
+"		" \n
+"		if (_modeldex ==""Survivor1_DZ"") then { " \n
+"			 _myGroupX = group _x;" \n
+"                   _x removeAllMPEventHandlers ""mpkilled"";" \n
+"                   _x removeAllMPEventHandlers ""mphit"";" \n
+"                   _x removeAllMPEventHandlers ""mprespawn"";" \n
+"                   _x removeAllEventHandlers ""FiredNear"";" \n
+"                  _x removeAllEventHandlers ""HandleDamage"";" \n
+"                  _x removeAllEventHandlers ""Killed"";" \n
+"                  _x removeAllEventHandlers ""Fired"";" \n
+"                  _x removeAllEventHandlers ""GetOut"";" \n
+"                  _x removeAllEventHandlers ""Local"";" \n
+"                   clearVehicleInit _x;" \n
+"                   deleteVehicle _x;" \n
+"                  deleteGroup _myGroupX;" \n
+"                  _x = nil;			" \n
+"		 };" \n
+"} forEach allDead;";
+precondition = "";
+class Links
+{
+
+class true
+{
+priority = 0.000000;
+to="General_Cleanup";
+precondition = "";
+condition="true";
+action="";
+};
+
+};
+};
+
+
+class Massive_Cleanup
+{
+name = "Massive_Cleanup";
+init = "private [""_myGroupX"",""_missionObjs""];" \n
+"//Clean All Dead" \n
+"{" \n
+"	_myGroupX = group _x;" \n
+"	 _x removeAllMPEventHandlers ""mpkilled"";" \n
+"	  _x removeAllMPEventHandlers ""mphit"";" \n
+"	 _x removeAllMPEventHandlers ""mprespawn"";" \n
+"	 _x removeAllEventHandlers ""FiredNear"";" \n
+"	_x removeAllEventHandlers ""HandleDamage"";" \n
+"	_x removeAllEventHandlers ""Killed"";" \n
+"	 _x removeAllEventHandlers ""Fired"";" \n
+"	_x removeAllEventHandlers ""GetOut"";" \n
+"	_x removeAllEventHandlers ""Local"";" \n
+"	clearVehicleInit _x;" \n
+"	deleteVehicle _x;" \n
+"	deleteGroup _myGroupX;" \n
+"	_x = nil;" \n
+"	_myGroupX = nil;" \n
+"} forEach allDead;" \n
+"" \n
+"//Clean Up All Flies Sounds" \n
+"{" \n
+"	deleteVehicle _x;" \n
+"	_x = nil;" \n
+"} forEach allMissionObjects ""Sound_Flies"";" \n
+"" \n
+"//Clean All Local Zombies" \n
+"{" \n
+"	if (local _x) then {" \n
+"		_myGroupX = group _x;" \n
+"		 _x removeAllMPEventHandlers ""mpkilled"";" \n
+"		  _x removeAllMPEventHandlers ""mphit"";" \n
+"		 _x removeAllMPEventHandlers ""mprespawn"";" \n
+"		 _x removeAllEventHandlers ""FiredNear"";" \n
+"		_x removeAllEventHandlers ""HandleDamage"";" \n
+"		_x removeAllEventHandlers ""Killed"";" \n
+"		 _x removeAllEventHandlers ""Fired"";" \n
+"		_x removeAllEventHandlers ""GetOut"";" \n
+"		_x removeAllEventHandlers ""Local"";" \n
+"		clearVehicleInit _x;" \n
+"		deleteVehicle _x;" \n
+"		deleteGroup _myGroupX;" \n
+"		_x = nil;" \n
+"		_myGroupX = nil;" \n
+"	};" \n
+"} forEach entities ""zZombie_Base"";" \n
+"" \n
+"//Clean All Local Bloodsuckers" \n
+"{" \n
+"	if (local _x) then {" \n
+"		_myGroupX = group _x;" \n
+"		 _x removeAllMPEventHandlers ""mpkilled"";" \n
+"		  _x removeAllMPEventHandlers ""mphit"";" \n
+"		 _x removeAllMPEventHandlers ""mprespawn"";" \n
+"		 _x removeAllEventHandlers ""FiredNear"";" \n
+"		_x removeAllEventHandlers ""HandleDamage"";" \n
+"		_x removeAllEventHandlers ""Killed"";" \n
+"		 _x removeAllEventHandlers ""Fired"";" \n
+"		_x removeAllEventHandlers ""GetOut"";" \n
+"		_x removeAllEventHandlers ""Local"";" \n
+"		clearVehicleInit _x;" \n
+"		deleteVehicle _x;" \n
+"		deleteGroup _myGroupX;" \n
+"		_x = nil;" \n
+"		_myGroupX = nil;" \n
+"	};" \n
+"} forEach entities ""Bloodsucker_Base"";" \n
+"" \n
+"//Clean All Animals" \n
+"{" \n
+"	_myGroupX = group _x;" \n
+"	 _x removeAllMPEventHandlers ""mpkilled"";" \n
+"	  _x removeAllMPEventHandlers ""mphit"";" \n
+"	 _x removeAllMPEventHandlers ""mprespawn"";" \n
+"	 _x removeAllEventHandlers ""FiredNear"";" \n
+"	_x removeAllEventHandlers ""HandleDamage"";" \n
+"	_x removeAllEventHandlers ""Killed"";" \n
+"	 _x removeAllEventHandlers ""Fired"";" \n
+"	_x removeAllEventHandlers ""GetOut"";" \n
+"	_x removeAllEventHandlers ""Local"";" \n
+"	clearVehicleInit _x;" \n
+"	deleteVehicle _x;" \n
+"	deleteGroup _myGroupX;" \n
+"	_x = nil;" \n
+"	_myGroupX = nil;" \n
+"} forEach allMissionObjects ""Animal"";" \n
+"" \n
+"//Update Objects" \n
+"{" \n
+"	needUpdate_objects = needUpdate_objects - [_x];" \n
+"	[_x,""all""] call server_updateObject;" \n
+"" \n
+"} forEach needUpdate_objects;" \n
+"" \n
+"_missionObjs = allMissionObjects ""WeaponHolder"";" \n
+"{" \n
+"	deleteVehicle _x;" \n
+"	_x = nil;" \n
+"} forEach _missionObjs;" \n
+"" \n
+"//Clean Groups" \n
+"{" \n
+"	if (count units _x==0) then {" \n
+"		deleteGroup _x;" \n
+"		_x = nil;" \n
+"	};" \n
+"} forEach allGroups;" \n
+"" \n
+"call BPServer_LoginQueueProcess;";
+precondition = "";
+class Links
+{
+
+class true
+{
+priority = 0.000000;
+to="General_Cleanup";
+precondition = "";
+condition="true";
+action="";
+};
+
+};
+};
+
+
+class Update_Bans
+{
+name = "Update_Bans";
+init = "call server_UpdateBans;";
+precondition = "";
+class Links
+{
+
+class true
+{
+priority = 0.000000;
+to="General_Cleanup";
+precondition = "";
+condition="true";
+action="";
+};
+
+};
+};
+
+};
+initState="init";
+finalStates[] =
+{
+};
+};

@@ -1,0 +1,2 @@
+#line 1 "z\addons\zero_server\server\zero_checkAlive.sqf"
+server_checkAlive ={private ["_clientID"];	_clientID = (owner (_this select 0));	dayzPlayerStillConnected = ["42"];	_clientID publicVariableClient "dayzPlayerStillConnected";	diag_log("dayzPlayerStillConnected");};
